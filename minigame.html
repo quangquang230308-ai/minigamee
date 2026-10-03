@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber Matrix: Classified Decryption Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050811;
+      --card-bg: rgba(10, 18, 36, 0.85);
+      --cyan: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.45);
+      --magenta: #ff0077;
+      --magenta-glow: rgba(255, 0, 119, 0.45);
+      --amber: #ffb703;
+      --amber-glow: rgba(255, 183, 3, 0.45);
+      --green: #00ff66;
+      --green-glow: rgba(0, 255, 102, 0.45);
+      --border-blue: rgba(0, 240, 255, 0.25);
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      gap: 16px;
+    }
+
+    /* HEADER HUD */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border-blue);
+      border-radius: 12px;
+      padding: 14px 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 15px var(--cyan-glow);
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .brand-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #fff, var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 13px;
+      color: var(--amber);
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 1px;
+    }
+
+    /* TABS TIẾN ĐỘ NIÊM PHONG (CLASSIFIED) */
+    .stages-tab {
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stage-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .stage-pill.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
+
+    .stage-pill.locked-pill {
+      opacity: 0.6;
+    }
+
+    .stage-pill.completed {
+      background: rgba(0, 255, 102, 0.15);
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+
+    /* GRID CHÍNH */
+    .game-grid-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr 340px;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .hud-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-blue);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hud-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-blue);
+      padding-bottom: 10px;
+    }
+
+    /* BẢNG ĐIỀU KHIỂN BÊN TRÁI */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.03);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .metric-label {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .metric-val {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .target-val {
+      color: var(--amber);
+      text-shadow: 0 0 12px var(--amber-glow);
+    }
+
+    .current-val {
+      color: var(--cyan);
+      text-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .delta-indicator {
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(0,0,0,0.4);
+      border: 1px dashed var(--text-muted);
+    }
+
+    .delta-indicator.match {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(0,255,102,0.1);
+      box-shadow: 0 0 15px var(--green-glow);
+    }
+
+    .delta-indicator.over {
+      border-color: var(--magenta);
+      color: var(--magenta);
+      background: rgba(255,0,119,0.1);
+    }
+
+    /* BÀN MA TRẬN TRUNG TÂM */
+    .matrix-arena {
+      background: rgba(10, 18, 36, 0.95);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.15), inset 0 0 40px rgba(0, 240, 255, 0.05);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .matrix-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .matrix-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .board-container {
+      position: relative;
+      display: inline-block;
+      margin: auto;
+    }
+
+    #laserSvg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .grid-board {
+      display: grid;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .matrix-cell {
+      width: 76px;
+      height: 76px;
+      background: rgba(15, 27, 56, 0.9);
+      border: 1.5px solid rgba(0, 240, 255, 0.35);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .matrix-cell:hover:not(.locked) {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .cell-letter {
+      font-family: 'Orbitron', monospace;
+      font-size: 17px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 1px;
+    }
+
+    .cell-number {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .matrix-cell.selected {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: var(--cyan);
+      box-shadow: 0 0 24px var(--cyan-glow), inset 0 0 15px var(--cyan-glow);
+      transform: scale(1.05);
+    }
+
+    .matrix-cell.selected .cell-letter {
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+    }
+
+    .matrix-cell.selected .cell-number {
+      color: #fff;
+      text-shadow: 0 0 14px #fff;
+    }
+
+    .matrix-cell.start-cell {
+      border-color: var(--amber);
+      box-shadow: 0 0 15px var(--amber-glow);
+    }
+
+    .matrix-cell.start-cell::after {
+      content: 'BẮT ĐẦU';
+      position: absolute;
+      bottom: -10px;
+      font-size: 9px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      background: var(--amber);
+      color: #000;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .matrix-cell.target-cell {
+      border-color: var(--magenta);
+      box-shadow: 0 0 15px var(--magenta-glow);
+    }
+
+    .matrix-cell.target-cell::after {
+      content: 'CỔNG ĐÍCH';
+      position: absolute;
+      bottom: -10px;
+      font-size: 9px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      background: var(--magenta);
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* KHO DỮ LIỆU BÊN PHẢI */
+    .protocol-status-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .classified-layer {
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed rgba(255,255,255,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .classified-layer.unlocked {
+      background: rgba(0, 255, 102, 0.08);
+      border-color: var(--green);
+    }
+
+    .layer-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .layer-content {
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      letter-spacing: 3px;
+      color: #64748b;
+    }
+
+    .classified-layer.unlocked .layer-content {
+      color: var(--green);
+      letter-spacing: 1px;
+      font-size: 12px;
+      text-shadow: 0 0 8px var(--green-glow);
+    }
+
+    /* NÚT THAO TÁC */
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-blue);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+
+    .btn-action:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .btn-verify {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(0, 255, 102, 0.3));
+      border-color: var(--cyan);
+    }
+
+    .btn-verify:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.5), rgba(0, 255, 102, 0.5));
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    /* MÀN GIẢI MÃ HOÀN TẤT */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 5, 15, 0.96);
+      backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(12, 22, 45, 0.95);
+      border: 2px solid var(--cyan);
+      border-radius: 20px;
+      box-shadow: 0 0 60px var(--cyan-glow), inset 0 0 40px rgba(0,240,255,0.1);
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      animation: modalGlitch 0.6s ease;
+    }
+
+    @keyframes modalGlitch {
+      0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .final-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      background: rgba(0, 255, 102, 0.15);
+      border: 1px solid var(--green);
+      border-radius: 20px;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .hacker-decoding {
+      font-family: 'Orbitron', monospace;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #fff;
+      margin: 20px 0;
+      min-height: 50px;
+      text-shadow: 0 0 25px var(--cyan);
+    }
+
+    .vietnamese-translation {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      text-shadow: 0 0 15px var(--amber-glow);
+    }
+
+    .final-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat-mini-card {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-word {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--cyan);
+    }
+
+    .btn-replay {
+      padding: 14px 40px;
+      background: linear-gradient(90deg, var(--cyan), #0077ff);
+      color: #000;
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 15px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--cyan-glow);
+      transition: all 0.3s;
+    }
+
+    .btn-replay:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 45px var(--cyan);
+    }
+
+    .cyber-toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(10, 18, 36, 0.95);
+      border: 1px solid var(--magenta);
+      box-shadow: 0 0 25px var(--magenta-glow);
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .cyber-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .cyber-toast.success {
+      border-color: var(--green);
+      box-shadow: 0 0 25px var(--green-glow);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="app-container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">CYBER MATRIX: CLASSIFIED CIPHER</div>
+          <div class="brand-sub">GIAO THỨC GIẢI MÃ MA TRẬN KHÔNG GIAN SỐ 4.0</div>
+        </div>
+      </div>
+
+      <div class="stages-tab">
+        <div class="stage-pill active" id="pill-0">MẬT MÃ #1: ALPHA</div>
+        <div class="stage-pill locked-pill" id="pill-1">MẬT MÃ #2: BETA</div>
+        <div class="stage-pill locked-pill" id="pill-2">MẬT MÃ #3: GAMMA</div>
+        <div class="stage-pill locked-pill" id="pill-3">MẬT MÃ #4: DELTA</div>
+      </div>
+    </header>
+
+    <div class="game-grid-layout">
+      <!-- BẢNG TRÁI -->
+      <div class="hud-card">
+        <div class="hud-title">
+          <span>⚙️</span> THÔNG SỐ TRUYỀN DẪN
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">MỤC TIÊU CỔNG ĐÍCH</span>
+          <span class="metric-val target-val" id="targetSumDisplay">00</span>
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">NĂNG LƯỢNG HIỆN TẠI</span>
+          <span class="metric-val current-val" id="currentSumDisplay">00</span>
+        </div>
+
+        <div class="delta-indicator" id="deltaStatus">
+          CHỜ KÍCH HOẠT ĐƯỜNG TRUYỀN...
+        </div>
+
+        <div class="metric-row">
+          <span class="metric-label">SỐ Ô ĐÃ KẾT NỐI</span>
+          <span class="metric-val" id="pathLengthDisplay" style="color: #fff;">0</span>
+        </div>
+
+        <div style="flex: 1;"></div>
+
+        <div class="controls-row">
+          <button class="btn-action" id="btnUndo">⤺ LÙI BƯỚC</button>
+          <button class="btn-action" id="btnReset">↻ ĐẶT LẠI</button>
+        </div>
+        <button class="btn-action btn-verify" id="btnVerify">✓ XÁC THỰC CỔNG ĐÍCH</button>
+      </div>
+
+      <!-- MA TRẬN TRUNG TÂM -->
+      <div class="matrix-arena">
+        <div class="matrix-header">
+          <div style="font-family: 'Orbitron', monospace; font-size: 15px; color: var(--cyan); letter-spacing: 1px;" id="stageTitle">
+            PHÂN VÙNG ALPHA // KHỞI ĐỘNG HỆ THỐNG
+          </div>
+          <div class="matrix-sub">DẪN TIA NĂNG LƯỢNG TỪ Ô [BẮT ĐẦU] ĐẾN [CỔNG ĐÍCH]</div>
+        </div>
+
+        <div class="board-container">
+          <svg id="laserSvg"></svg>
+          <div class="grid-board" id="gridBoard"></div>
+        </div>
+      </div>
+
+      <!-- KHO DỮ LIỆU PHẢI -->
+      <div class="hud-card">
+        <div class="hud-title">
+          <span>🔒</span> KHO DỮ LIỆU NIÊM PHONG
+        </div>
+
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          Mỗi màn chơi ẩn chứa 1 mật mã năng lượng. Toàn bộ thông điệp quốc gia tối cao sẽ được giữ kín tuyệt đối và chỉ được giải mã sau khi vượt qua Màn 4.
+        </div>
+
+        <div class="protocol-status-box">
+          <div class="classified-layer" id="layer-card-0">
+            <div class="layer-tag">
+              <span>TẦNG 1 // ALPHA</span>
+              <span id="layer-status-0">ĐANG MỞ KHÓA</span>
+            </div>
+            <div class="layer-content" id="layer-content-0">••••••••</div>
+          </div>
+
+          <div class="classified-layer" id="layer-card-1">
+            <div class="layer-tag">
+              <span>TẦNG 2 // BETA</span>
+              <span id="layer-status-1">BỊ KHÓA</span>
+            </div>
+            <div class="layer-content" id="layer-content-1">•••••••••••</div>
+          </div>
+
+          <div class="classified-layer" id="layer-card-2">
+            <div class="layer-tag">
+              <span>TẦNG 3 // GAMMA</span>
+              <span id="layer-status-2">BỊ KHÓA</span>
+            </div>
+            <div class="layer-content" id="layer-content-2">••••••••</div>
+          </div>
+
+          <div class="classified-layer" id="layer-card-3">
+            <div class="layer-tag">
+              <span>TẦNG 4 // DELTA</span>
+              <span id="layer-status-3">BỊ KHÓA</span>
+            </div>
+            <div class="layer-content" id="layer-content-3">•••••</div>
+          </div>
+        </div>
+
+        <div style="flex: 1;"></div>
+        <button class="btn-action" id="btnHint" style="border-color: rgba(255,183,3,0.3); color: var(--amber);">
+          💡 GỢI Ý ĐƯỜNG TRUYỀN SỐ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BẢNG GIẢI MÃ THÀNH CÔNG -->
+  <div class="modal-overlay" id="victoryModal">
+    <div class="modal-box">
+      <div class="final-badge">✓ GIAO THỨC AN NINH ĐÃ HOÀN TẤT TRỌN VẸN</div>
+      <div style="font-size: 14px; color: #94a3b8; letter-spacing: 2px;">GIẢI MÃ THÀNH CÔNG THÔNG ĐIỆP TỐI CAO:</div>
+
+      <div class="hacker-decoding" id="decodedTextStream">DECRYPTING...</div>
+      <div class="vietnamese-translation">"BẢO VỆ CHỦ QUYỀN, GÌN GIỮ HOÀ BÌNH"</div>
+
+      <div class="final-stats-grid">
+        <div class="stat-mini-card">
+          <div class="stat-label">MẬT MÃ TẦNG 1</div>
+          <div class="stat-word">SECURING</div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-label">MẬT MÃ TẦNG 2</div>
+          <div class="stat-word">SOVEREIGNTY</div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-label">MẬT MÃ TẦNG 3</div>
+          <div class="stat-word">ENSURING</div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-label">MẬT MÃ TẦNG 4</div>
+          <div class="stat-word">PEACE</div>
+        </div>
+      </div>
+
+      <button class="btn-replay" id="btnReplay">TÁI THIẾT LẬP HỆ THỐNG</button>
+    </div>
+  </div>
+
+  <div class="cyber-toast" id="toast">
+    <span id="toastIcon">⚠️</span>
+    <span id="toastMsg">Cảnh báo hệ thống</span>
+  </div>
+
+  <script>
+    const STAGES = [
+      {
+        id: 0,
+        name: "PHÂN VÙNG ALPHA // KHỞI ĐỘNG HỆ THỐNG",
+        word: "SECURING",
+        rows: 4,
+        cols: 4,
+        targetSum: 42,
+        startCoord: [0, 0],
+        endCoord: [3, 3],
+        grid: [
+          [{l:'S', v:5, path:true}, {l:'E', v:4, path:true}, {l:'X', v:14, path:false}, {l:'T', v:9, path:false}],
+          [{l:'A', v:11, path:false}, {l:'C', v:6, path:true}, {l:'I', v:3, path:true}, {l:'N', v:7, path:true}],
+          [{l:'M', v:8, path:false}, {l:'U', v:8, path:true}, {l:'R', v:4, path:true}, {l:'K', v:12, path:false}],
+          [{l:'P', v:15, path:false}, {l:'B', v:10, path:false}, {l:'O', v:13, path:false}, {l:'G', v:5, path:true}]
+        ]
+      },
+      {
+        id: 1,
+        name: "PHÂN VÙNG BETA // MỞ RỘNG VÀNH ĐAI CHỦ QUYỀN",
+        word: "SOVEREIGNTY",
+        rows: 5,
+        cols: 5,
+        targetSum: 78,
+        startCoord: [0, 0],
+        endCoord: [4, 4],
+        grid: [
+          [{l:'S', v:6, path:true}, {l:'O', v:8, path:true}, {l:'V', v:7, path:true}, {l:'D', v:16, path:false}, {l:'F', v:14, path:false}],
+          [{l:'W', v:15, path:false}, {l:'H', v:12, path:false}, {l:'E', v:5, path:true}, {l:'R', v:9, path:true}, {l:'E', v:6, path:true}],
+          [{l:'Q', v:18, path:false}, {l:'L', v:10, path:false}, {l:'Z', v:20, path:false}, {l:'K', v:13, path:false}, {l:'I', v:8, path:true}],
+          [{l:'M', v:11, path:false}, {l:'X', v:17, path:false}, {l:'N', v:9, path:true}, {l:'G', v:7, path:true}, {l:'J', v:19, path:false}],
+          [{l:'U', v:14, path:false}, {l:'P', v:15, path:false}, {l:'T', v:11, path:true}, {l:'B', v:21, path:false}, {l:'Y', v:8, path:true}]
+        ]
+      },
+      {
+        id: 2,
+        name: "PHÂN VÙNG GAMMA // ĐẢM BẢO AN NINH TRẬT TỰ",
+        word: "ENSURING",
+        rows: 4,
+        cols: 4,
+        targetSum: 65,
+        startCoord: [0, 3],
+        endCoord: [3, 0],
+        grid: [
+          [{l:'B', v:17, path:false}, {l:'S', v:8, path:true}, {l:'N', v:9, path:true}, {l:'E', v:7, path:true}],
+          [{l:'T', v:12, path:false}, {l:'U', v:9, path:true}, {l:'C', v:16, path:false}, {l:'Z', v:22, path:false}],
+          [{l:'N', v:10, path:true}, {l:'R', v:8, path:true}, {l:'I', v:7, path:true}, {l:'W', v:19, path:false}],
+          [{l:'G', v:7, path:true}, {l:'Y', v:15, path:false}, {l:'M', v:14, path:false}, {l:'V', v:20, path:false}]
+        ]
+      },
+      {
+        id: 3,
+        name: "PHÂN VÙNG DELTA // CỔNG HOÀ BÌNH TOÀN DIỆN",
+        word: "PEACE",
+        rows: 4,
+        cols: 4,
+        targetSum: 55,
+        startCoord: [0, 0],
+        endCoord: [3, 3],
+        grid: [
+          [{l:'P', v:11, path:true}, {l:'X', v:19, path:false}, {l:'J', v:23, path:false}, {l:'K', v:25, path:false}],
+          [{l:'E', v:12, path:true}, {l:'O', v:18, path:false}, {l:'Q', v:15, path:false}, {l:'V', v:21, path:false}],
+          [{l:'A', v:10, path:true}, {l:'C', v:9, path:true}, {l:'L', v:16, path:false}, {l:'T', v:14, path:false}],
+          [{l:'H', v:24, path:false}, {l:'M', v:20, path:false}, {l:'R', v:17, path:false}, {l:'E', v:13, path:true}]
+        ]
+      }
+    ];
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type = 'sine', duration = 0.15, vol = 0.15) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function soundConnect() { playTone(540, 'triangle', 0.12, 0.15); }
+    function soundUndo() { playTone(280, 'sawtooth', 0.1, 0.12); }
+    function soundError() {
+      playTone(180, 'sawtooth', 0.25, 0.2);
+      setTimeout(() => playTone(140, 'sawtooth', 0.2, 0.2), 80);
+    }
+    function soundPassStage() {
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.35, 0.2), i * 100));
+    }
+
+    let currentStageIdx = 0;
+    let selectedPath = [];
+    let completedStages = [false, false, false, false];
+
+    const gridBoard = document.getElementById('gridBoard');
+    const laserSvg = document.getElementById('laserSvg');
+    const targetSumDisplay = document.getElementById('targetSumDisplay');
+    const currentSumDisplay = document.getElementById('currentSumDisplay');
+    const pathLengthDisplay = document.getElementById('pathLengthDisplay');
+    const deltaStatus = document.getElementById('deltaStatus');
+    const stageTitle = document.getElementById('stageTitle');
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    const victoryModal = document.getElementById('victoryModal');
+    const decodedTextStream = document.getElementById('decodedTextStream');
+
+    function loadStage(stageIndex) {
+      currentStageIdx = stageIndex;
+      selectedPath = [];
+      const stage = STAGES[stageIndex];
+
+      stageTitle.textContent = stage.name;
+      targetSumDisplay.textContent = stage.targetSum;
+      currentSumDisplay.textContent = "0";
+      pathLengthDisplay.textContent = "0";
+      updateDeltaIndicator(0, stage.targetSum);
+
+      for (let i = 0; i < 4; i++) {
+        const pill = document.getElementById(`pill-${i}`);
+        pill.classList.remove('active', 'completed', 'locked-pill');
+        if (completedStages[i]) pill.classList.add('completed');
+        else if (i === currentStageIdx) pill.classList.add('active');
+        else pill.classList.add('locked-pill');
+      }
+
+      gridBoard.innerHTML = '';
+      gridBoard.style.gridTemplateColumns = `repeat(${stage.cols}, 76px)`;
+      gridBoard.style.gridTemplateRows = `repeat(${stage.rows}, 76px)`;
+
+      for (let r = 0; r < stage.rows; r++) {
+        for (let c = 0; c < stage.cols; c++) {
+          const cellData = stage.grid[r][c];
+          const cellEl = document.createElement('div');
+          cellEl.className = 'matrix-cell';
+          cellEl.id = `cell-${r}-${c}`;
+          cellEl.dataset.row = r;
+          cellEl.dataset.col = c;
+          cellEl.dataset.val = cellData.v;
+          cellEl.dataset.letter = cellData.l;
+
+          if (r === stage.startCoord[0] && c === stage.startCoord[1]) cellEl.classList.add('start-cell');
+          if (r === stage.endCoord[0] && c === stage.endCoord[1]) cellEl.classList.add('target-cell');
+
+          cellEl.innerHTML = `
+            <span class="cell-letter">${cellData.l}</span>
+            <span class="cell-number">${cellData.v}</span>
+          `;
+          cellEl.addEventListener('click', () => handleCellClick(r, c));
+          gridBoard.appendChild(cellEl);
+        }
+      }
+
+      setTimeout(() => handleCellClick(stage.startCoord[0], stage.startCoord[1]), 100);
+      renderLaserPath();
+    }
+
+    function handleCellClick(r, c) {
+      const stage = STAGES[currentStageIdx];
+      const existingIdx = selectedPath.findIndex(p => p[0] === r && p[1] === c);
+      if (existingIdx !== -1) {
+        if (existingIdx === selectedPath.length - 1 && selectedPath.length > 1) undoLastStep();
+        return;
+      }
+
+      if (selectedPath.length === 0) {
+        if (r === stage.startCoord[0] && c === stage.startCoord[1]) {
+          selectedPath.push([r, c]);
+          soundConnect();
+          updateGameState();
+        } else {
+          showToast('Phải bắt đầu kết nối từ ô BẮT ĐẦU!', 'warn');
+          soundError();
+        }
+        return;
+      }
+
+      const lastCell = selectedPath[selectedPath.length - 1];
+      const isAdjacent = (Math.abs(lastCell[0] - r) + Math.abs(lastCell[1] - c) === 1);
+
+      if (isAdjacent) {
+        selectedPath.push([r, c]);
+        soundConnect();
+        updateGameState();
+      } else {
+        showToast('Chỉ có thể kết nối với các ô nằm liền kề trực tiếp!', 'warn');
+        soundError();
+      }
+    }
+
+    function undoLastStep() {
+      if (selectedPath.length > 1) {
+        selectedPath.pop();
+        soundUndo();
+        updateGameState();
+      }
+    }
+
+    function resetCurrentStage() {
+      selectedPath = [];
+      const stage = STAGES[currentStageIdx];
+      soundUndo();
+      handleCellClick(stage.startCoord[0], stage.startCoord[1]);
+    }
+
+    function updateGameState() {
+      const stage = STAGES[currentStageIdx];
+      document.querySelectorAll('.matrix-cell').forEach(cell => cell.classList.remove('selected'));
+      let currentSum = 0;
+
+      selectedPath.forEach(([r, c]) => {
+        const cellEl = document.getElementById(`cell-${r}-${c}`);
+        if (cellEl) cellEl.classList.add('selected');
+        currentSum += stage.grid[r][c].v;
+      });
+
+      currentSumDisplay.textContent = currentSum;
+      pathLengthDisplay.textContent = selectedPath.length;
+      updateDeltaIndicator(currentSum, stage.targetSum);
+      renderLaserPath();
+    }
+
+    function updateDeltaIndicator(current, target) {
+      const delta = current - target;
+      deltaStatus.className = 'delta-indicator';
+
+      if (current === 0) {
+        deltaStatus.textContent = 'CHỜ KÍCH HOẠT ĐƯỜNG TRUYỀN...';
+      } else if (delta === 0) {
+        deltaStatus.textContent = '✓ ĐÃ ĐẠT NĂNG LƯỢNG MỤC TIÊU (ĐỘ LỆCH = 0)';
+        deltaStatus.classList.add('match');
+      } else if (delta < 0) {
+        deltaStatus.textContent = `CÒN THIẾU NĂNG LƯỢNG: ${Math.abs(delta)} ĐƠN VỊ`;
+      } else {
+        deltaStatus.textContent = `VƯỢT NGƯỠNG AN TOÀN: +${delta} ĐƠN VỊ!`;
+        deltaStatus.classList.add('over');
+      }
+    }
+
+    function renderLaserPath() {
+      laserSvg.innerHTML = '';
+      if (selectedPath.length < 2) return;
+
+      const boardRect = gridBoard.getBoundingClientRect();
+      const points = [];
+
+      selectedPath.forEach(([r, c]) => {
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        if (!cell) return;
+        const rect = cell.getBoundingClientRect();
+        const x = rect.left - boardRect.left + rect.width / 2;
+        const y = rect.top - boardRect.top + rect.height / 2;
+        points.push(`${x},${y}`);
+      });
+
+      const polylineBack = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polylineBack.setAttribute('points', points.join(' '));
+      polylineBack.setAttribute('fill', 'none');
+      polylineBack.setAttribute('stroke', '#00f0ff');
+      polylineBack.setAttribute('stroke-width', '6');
+      polylineBack.setAttribute('stroke-linecap', 'round');
+      polylineBack.setAttribute('stroke-linejoin', 'round');
+      polylineBack.setAttribute('opacity', '0.4');
+      polylineBack.setAttribute('filter', 'drop-shadow(0 0 8px #00f0ff)');
+
+      const polylineCore = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polylineCore.setAttribute('points', points.join(' '));
+      polylineCore.setAttribute('fill', 'none');
+      polylineCore.setAttribute('stroke', '#ffffff');
+      polylineCore.setAttribute('stroke-width', '2.5');
+      polylineCore.setAttribute('stroke-linecap', 'round');
+      polylineCore.setAttribute('stroke-linejoin', 'round');
+
+      laserSvg.appendChild(polylineBack);
+      laserSvg.appendChild(polylineCore);
+    }
+
+    function verifyDestination() {
+      const stage = STAGES[currentStageIdx];
+      const lastCell = selectedPath[selectedPath.length - 1];
+
+      if (!lastCell || lastCell[0] !== stage.endCoord[0] || lastCell[1] !== stage.endCoord[1]) {
+        showToast('Đường truyền chưa dẫn tới CỔNG ĐÍCH!', 'warn');
+        soundError();
+        return;
+      }
+
+      let sum = 0;
+      selectedPath.forEach(([r, c]) => sum += stage.grid[r][c].v);
+
+      if (sum !== stage.targetSum) {
+        const diff = sum - stage.targetSum;
+        const diffMsg = diff > 0 ? `vượt quá +${diff}` : `thiếu hụt ${diff}`;
+        showToast(`Năng lượng không khớp! Hiện tại: ${sum}/${stage.targetSum} (${diffMsg})`, 'warn');
+        soundError();
+        return;
+      }
+
+      soundPassStage();
+      completedStages[currentStageIdx] = true;
+
+      const layerCard = document.getElementById(`layer-card-${currentStageIdx}`);
+      const layerStatus = document.getElementById(`layer-status-${currentStageIdx}`);
+      const layerContent = document.getElementById(`layer-content-${currentStageIdx}`);
+
+      layerCard.classList.add('unlocked');
+      layerStatus.textContent = 'HOÀN TẤT // NIÊM PHONG';
+      layerStatus.style.color = '#00ff66';
+      layerContent.textContent = '[ MẬT MÃ TẦNG ' + (currentStageIdx + 1) + ': ĐÃ KHÓA BẢO VỆ ]';
+
+      if (currentStageIdx < 3) {
+        showToast(`XÁC THỰC THÀNH CÔNG TẦNG ${currentStageIdx + 1}! CHUYỂN TIẾP TẦNG KẾ TIẾP...`, 'success');
+        setTimeout(() => loadStage(currentStageIdx + 1), 1200);
+      } else {
+        setTimeout(() => triggerGrandDecryption(), 800);
+      }
+    }
+
+    function triggerGrandDecryption() {
+      victoryModal.classList.add('active');
+      const targetPhrase = "SECURING SOVEREIGNTY, ENSURING PEACE";
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+      let iteration = 0;
+
+      const interval = setInterval(() => {
+        decodedTextStream.innerText = targetPhrase
+          .split("")
+          .map((char, index) => {
+            if (char === " " || char === ",") return char;
+            if (index < iteration) return targetPhrase[index];
+            return alphabet[Math.floor(Math.random() * alphabet.length)];
+          })
+          .join("");
+
+        if (iteration >= targetPhrase.length) {
+          clearInterval(interval);
+          playTone(880, 'sine', 0.8, 0.3);
+        }
+        iteration += 1 / 2;
+      }, 40);
+    }
+
+    function giveHint() {
+      const stage = STAGES[currentStageIdx];
+      showToast('Gợi ý: Hãy quan sát các ô có giá trị cân bằng để đạt tổng ' + stage.targetSum, 'success');
+      soundConnect();
+    }
+
+    function showToast(msg, type = 'warn') {
+      toastMsg.textContent = msg;
+      toast.className = 'cyber-toast show';
+      if (type === 'success') toast.classList.add('success');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        size: Math.random() * 2 + 1
+      });
+    }
+
+    function animateBg() {
+      ctx.fillStyle = 'rgba(5, 8, 17, 0.25)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
+      ctx.lineWidth = 1;
+      const gridSize = 60;
+      for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animateBg);
+    }
+    animateBg();
+
+    document.getElementById('btnUndo').addEventListener('click', undoLastStep);
+    document.getElementById('btnReset').addEventListener('click', resetCurrentStage);
+    document.getElementById('btnVerify').addEventListener('click', verifyDestination);
+    document.getElementById('btnHint').addEventListener('click', giveHint);
+    document.getElementById('btnReplay').addEventListener('click', () => {
+      victoryModal.classList.remove('active');
+      completedStages = [false, false, false, false];
+      for (let i = 0; i < 4; i++) {
+        document.getElementById(`layer-card-${i}`).classList.remove('unlocked');
+        document.getElementById(`layer-status-${i}`).textContent = i === 0 ? 'ĐANG MỞ KHÓA' : 'BỊ KHÓA';
+        document.getElementById(`layer-status-${i}`).style.color = '';
+        document.getElementById(`layer-content-${i}`).textContent = '••••••••';
+      }
+      loadStage(0);
+    });
+
+    window.addEventListener('resize', () => renderLaserPath());
+    loadStage(0);
+  </script>
+</body>
+</html>
